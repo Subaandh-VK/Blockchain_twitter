@@ -53,7 +53,7 @@ module.exports = {
 			host: process.env.host || "localhost",
 			port: 8545,
 			network_id: "*", // Match any network id,
-			gas: 6721975,
+			gas: 6421975,
 		},
 		ropsten: {
 			provider: () =>

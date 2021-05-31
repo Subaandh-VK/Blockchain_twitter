@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Twitter front-end</title>
+    <script language="javascript" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script language="javascript" type="text/javascript" src="../node_modules/web3/dist/web3.min.js"></script>
+    <script language="javascript" type="text/javascript" src="abi.js"></script>
+  </head>
+  <body>
+    <script>
+        window.ethreum
+        var web3;
+        var account;
+        var smartContract;
+        var address = "0x0e6339530B02761b75c7e7776B19677A010A6f86";
+
+        async function startApp() {
+          // web3 = new Web3(window.ethreum || new Web3.providers.WebsocketProvider("wss://ropsten.infura.io/ws/v3/055fb69f5912489994d5395f5754fb04"));          
+          web3 = new Web3(new Web3.providers.HttpProvider("http://127.0.0.1:8545"));          
+
+          smartContract = new web3.eth.Contract(abi, address);
+
+          account = await web3.eth.getAccounts()
+          console.log("Default account: ",account[0])
+          web3.eth.defaultAccount = '0xBc7099686d5f547dec27CE588541402E94D5797B';
+          console.log("Account is: "+ web3.eth.defaultAccount)
+
+
+          var read = await smartContract.methods.getTweetsByOwner(web3.eth.defaultAccount).call()
+          console.log(read);
+
+          var read = await smartContract.methods._readTweet(5).call()
+          console.log(read);
+          displayTweets();
+        }
+
+        startApp();
+
+        function displayTweets(ids) {
+          console.log("In Display...............")
+          $("#tweets").empty();
+          console.log("In Display")
+          for (id of ids) { 
+            console.log("Before function" +id);
+            getTweetDetails(id).then(function(tweet) {
+              console.log("In function");
+              $("#tweets").append(`<div class="zombie">
+              <ul>
+                <li>Name: ${tweet.tweetOwner}</li>
+                <li>ID: ${tweet.tweetId}</li>
+                <li>Message: ${tweet.tweetMsg}</li>
+                </ul>
+                </div>`);
+          });
+        }
+      }
+
+      function getTweetDetails(id) {
+        console.log("Id is "+id)
+        return smartContract.methods.tweets(id).call();
+      }
+
+      function gettweetToOwner(id) {
+        return smartContract.methods.tweetToOwner(id).call();
+      }
+
+      function getTweetsByOwner(owner) {
+        console.log("Showing Error");
+        return smartContract.methods.getTweetsByOwner(owner).call();
+      }
+    </script>
+  </body>
+</html>

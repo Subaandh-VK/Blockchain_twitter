@@ -11,57 +11,88 @@ contract Twitter {
     }
 
     uint256 tweetId;
-    uint256 totalTweets;
     Tweet[] public tweets;
+
 
     // Event to notify
     event CreateTweet(uint256 tweetOwner, uint256 tweetId,uint256 tweetTime, string tweetMsg);
-    event ReadTweet(uint256 tweetOwner, uint256 tweetId,uint256 tweetTime, string tweetMsg);
     event UpdateTweet(uint256 tweetId,uint256 tweetTime, string tweetMsg);
     event DeleteTweet(uint256 tweetOwner);
     
-    mapping (uint256 => address) public tweetOwner;
-    mapping (address => uint) public tweetCount;
+    mapping (uint256 => address) public tweetToOwner;
+    mapping (address => uint256) tweetCount;
 
-    function _createTweet(uint256 Owner, string memory tweetMsg) public {
-        tweets.push(Tweet(Owner, tweetId, block.timestamp, tweetMsg));
-        tweetId == tweets.length - 1;
-        tweetOwner[tweetId] = msg.sender;
+
+    /**
+	 * @dev A function that creates new Tweet 
+	 * @param owner The owners userId
+	 * @param tweetMsg The tweet message he wishes to post
+	 */    
+    function _createTweet(uint256 owner, string memory tweetMsg) public {
+        tweets.push(Tweet(owner, tweetId, block.timestamp, tweetMsg));
+        tweetId = tweets.length;
+        tweetToOwner[tweetId] = msg.sender;
         tweetCount[msg.sender] ++;
-        totalTweets++;
 
-        emit CreateTweet(Owner, tweetId, block.timestamp, tweetMsg);
+        emit CreateTweet(owner, tweetId, block.timestamp, tweetMsg);
 	}
-
-    function _readTweet(uint256 OwnerId) public {
+    
+    /**
+     * @dev A function that Reads new Tweet
+     * @param owner The owners userId
+     */ 
+    function _readTweet(uint256 owner) public view returns (string memory){
         for (uint256 i = 0; i < tweets.length ; i++) {
-            if (tweets[i].tweetId == tweetId) {
-                emit ReadTweet(OwnerId, tweets[i].tweetId, tweets[i].tweetTime, tweets[i].tweetMsg);       
+            if (tweets[i].tweetOwner == owner) {
+                return tweets[i].tweetMsg;
             }
         }
+        return "Unable to read tweet";
     }
 
-    function _updateTweet(uint256 ownerId, string memory tweetMsg) public {
+    /**
+    * @dev A function that Updates an existing Tweet
+    * @param owner The owner userid to be updated
+    * @param tweetMsg The tweet message to be updated
+     */ 
+    function _updateTweet(uint256 owner, string memory tweetMsg) public {
         for (uint256 i = 0; i < tweets.length ; i++) {
-            if (tweets[i].tweetOwner == ownerId) {
+            if (tweets[i].tweetOwner == owner) {
                 tweets[i].tweetTime = block.timestamp;
                 tweets[i].tweetMsg = tweetMsg;
-                emit UpdateTweet(ownerId, block.timestamp, tweetMsg);
+                emit UpdateTweet(owner, block.timestamp, tweetMsg);
             }
         }
     }
 
-    function _deleteTweet(uint256 ownerId) public {
+    /**
+    * @dev A function that Updates an existing Tweet
+    * @param owner The owner userid to be updated
+     */
+    function _deleteTweet(uint256 owner) public {
         for (uint256 i = 0; i < tweets.length ; i++) {
-            if (tweets[i].tweetOwner == ownerId) {
-
+            if (tweets[i].tweetOwner == owner) {
                 tweetCount[msg.sender] -= 1;
-                tweetOwner[tweets[i].tweetId] = address(0);
+                tweetToOwner[tweets[i].tweetId] = address(0);
                 delete tweets[i];
-                totalTweets--;
-                emit DeleteTweet(ownerId);
+                emit DeleteTweet(owner);
             }
         }
     }
 
+    /**
+    * @dev A function that Updates an existing Tweet
+    * @param owner The owner userid to be updated
+     */
+    function getTweetsByOwner(address owner) external view returns(uint256[] memory) {
+        uint256[] memory result = new uint256[](tweetCount[owner]);
+        uint counter = 0;
+        for (uint i = 0; i < tweets.length; i++) {
+            if (tweetToOwner[i] == owner) {
+                result[counter] = i;
+                counter++;
+            }
+        }
+        return result;
+    }
 }
