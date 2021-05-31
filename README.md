@@ -48,6 +48,11 @@ truffle migrate
 ``` bash
 truffle migrare --network ropsten
 ```
+Latest Ropsten Deployment Transaction Hash: 0x8c5c393d1da089c8813777f37329f361ef37f25d77be7d69c8e29407ffc6d057
+
+#  Websites
+https://infura.io/ - Website to create an infura project
+https://faucet.ropsten.be/ - Free test ETH for your wallet
 
 # Troubleshoot
 
